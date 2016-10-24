@@ -42,6 +42,7 @@ Tao\Service::init([
         return $action;
     }
 ])->run();
+```
 
 To use the data access layer call the static `Tao\Action::init()` from within 
 your logic, and pass it the `$action` instance. This will provide the database 
