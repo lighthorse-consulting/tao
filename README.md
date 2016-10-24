@@ -51,14 +51,14 @@ call the `run()` method to execute and return the `$action` instance, for
 example:
 
 ```php
-return Tao\action::init($action)->entity(['text' => 'Hello World'])->run();
+return Tao\Action::init($action)->entity(['text' => 'Hello World'])->run();
 ```
 
 Both the `entity()` and `collection()` methods can receive raw data, or they can 
 take a string, which they assume to be an SQL function, for example:
 
 ```php
-return Tao\action::init($action)->entity('do_something')->run();
+return Tao\Action::init($action)->entity('do_something')->run();
 ```
 
 A set of arguments to pass to that function may be provided as the second 
