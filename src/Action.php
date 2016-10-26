@@ -47,7 +47,7 @@ class Action
      */
     public function __construct(BaseAction $action)
     {
-        $this->settings = parse_ini_file('settings.ini', true);
+        $this->settings = parse_ini_file(dirname($_SERVER['SCRIPT_NAME']) . DIRECTORY_SEPARATOR . 'settings.ini', true);
         $this->action = $action;
     }
 
@@ -109,7 +109,7 @@ class Action
      * @param string $sql The SQL query to execute.
      * @return array
      */
-    public function query($sql)
+    protected function query($sql)
     {
         return $this->database()->query($sql, \PDO::FETCH_ASSOC)->fetchAll();
     }
@@ -120,7 +120,7 @@ class Action
      * @param string $location The optional location of the parameters.
      * @return string
      */
-    public function params($location = null)
+    protected function params($location = null)
     {
         $params = [];
         foreach ($this->action->getParams($location) as $param) {
@@ -142,26 +142,28 @@ class Action
      */
     public function entity($entity, $params = true)
     {
-        if (is_string($entity)) {
-            if (!$this->database) {
-                $this->database();
-            }
-            if ($params) {
-                if (is_array($params)) {
-                    $items = [];
-                    foreach ($params as $param => $value) {
-                        $items[] = "p_{$param} := {$value}";
+        try {
+            if (is_string($entity)) {
+                if ($params) {
+                    if (is_array($params)) {
+                        $items = [];
+                        foreach ($params as $param => $value) {
+                            $items[] = "p_{$param} := {$value}";
+                        }
+                        $params = implode(', ', $items);
+                    } else {
+                        $params = is_string($params) ? $this->params($params) : $this->params();
                     }
-                    $params = implode(', ', $params);
+                    $entity = $this->query("SELECT {$entity}({$params})");
                 } else {
-                    $params = is_string($params) ? $this->params($params) : $this->params();
+                    $entity = $this->query("SELECT {$entity}()");
                 }
-                $entity = $this->query("SELECT * FROM {$entity}({$params})");
-            } else {
-                $entity = $this->query("SELECT * FROM {$entity}()");
+                $entity = $entity[0];
             }
+            $this->action->setEntity($entity);
+        } catch(\Exception $e) {
+            $this->action->error($e->getMessage(), $e->getCode());
         }
-        $this->action->setEntity($entity);
         return $this;
     }
 
@@ -178,26 +180,27 @@ class Action
      */
     public function collection($collection, $params = true)
     {
-        if (is_string($collection)) {
-            if (!$this->database) {
-                $this->database();
-            }
-            if ($params) {
-                if (is_array($params)) {
-                    $items = [];
-                    foreach ($params as $param => $value) {
-                        $items[] = "p_{$param} := {$value}";
+        try {
+            if (is_string($collection)) {
+                if ($params) {
+                    if (is_array($params)) {
+                        $items = [];
+                        foreach ($params as $param => $value) {
+                            $items[] = "p_{$param} := {$value}";
+                        }
+                        $params = implode(', ', $items);
+                    } else {
+                        $params = is_string($params) ? $this->params($params) : $this->params();
                     }
-                    $params = implode(', ', $params);
+                    $collection = $this->query("SELECT {$collection}({$params})");
                 } else {
-                    $params = is_string($params) ? $this->params($params) : $this->params();
+                    $collection = $this->query("SELECT {$collection}()");
                 }
-                $collection = $this->query("SELECT * FROM {$collection}({$params})");
-            } else {
-                $collection = $this->query("SELECT * FROM {$collection}()");
             }
+            $this->action->setCollection($collection);
+        } catch(\Exception $e) {
+            $this->action->error($e->getMessage(), $e->getCode());
         }
-        $this->action->setCollection($collection);
         return $this;
     }
 
@@ -211,10 +214,14 @@ class Action
      */
     public function relation($pk, $type, $fk)
     {
-        if (is_array($fk)) {
-            $this->action->relateMany($pk, $type, $fk);
-        } else {
-            $this->action->relateOne($pk, $type, $fk);
+        try {
+            if (is_array($fk)) {
+                $this->action->relateMany($pk, $type, $fk);
+            } else {
+                $this->action->relateOne($pk, $type, $fk);
+            }
+        } catch(\Exception $e) {
+            $this->action->error($e->getMessage(), $e->getCode());
         }
         return $this;
     }
@@ -228,7 +235,11 @@ class Action
      */
     public function link($link, $uri)
     {
-        $this->action->link($link, $uri);
+        try {
+            $this->action->link($link, $uri);
+        } catch(\Exception $e) {
+            $this->action->error($e->getMessage(), $e->getCode());
+        }
         return $this;
     }
 
@@ -242,7 +253,11 @@ class Action
      */
     public function error($message, $code = 0, $status = self::ERROR_STATUS)
     {
-        $this->action->error($message, $code, $status);
+        try {
+            $this->action->error($message, $code, $status);
+        } catch(\Exception $e) {
+            $this->action->error($e->getMessage(), $e->getCode());
+        }
         return $this;
     }
 }
