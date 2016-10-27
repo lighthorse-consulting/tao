@@ -58,7 +58,7 @@ class Service
                 'version' => $action->getVersion(),
                 'time' => date('Y-m-d H:i:s')
             ])->run();
-        }
+        });
         foreach ($actions as $action => $callback) {
             $service->action($action, $callback);
         }
