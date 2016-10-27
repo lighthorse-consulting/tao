@@ -47,7 +47,12 @@ class Action
      */
     public function __construct(BaseAction $action)
     {
-        $this->settings = parse_ini_file(dirname($_SERVER['SCRIPT_NAME']) . DIRECTORY_SEPARATOR . 'settings.ini', true);
+        $path = dirname($_SERVER['SCRIPT_NAME']) . DIRECTORY_SEPARATOR;
+        $this->settings = parse_ini_file($path . 'settings.ini', true);
+        if (is_readable($path . 'settings.local.ini')) {
+            $settings = parse_ini_file($path . 'settings.local.ini', true);
+            $this->settings = array_merge($this->settings, $settings);
+        }
         $this->action = $action;
     }
 
