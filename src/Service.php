@@ -51,6 +51,14 @@ class Service
     {
         $instance = new static;
         $service = $instance->service();
+        $service->action('status', function ($action) {
+            return Action::init($action)->entity([
+                'status' => 'OK',
+                'service' => $action->getName(),
+                'version' => $action->getVersion(),
+                'time' => date('Y-m-d H:i:s')
+            ])->run();
+        }
         foreach ($actions as $action => $callback) {
             $service->action($action, $callback);
         }
