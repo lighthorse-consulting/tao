@@ -159,9 +159,9 @@ class Action
                     } else {
                         $params = is_string($params) ? $this->params($params) : $this->params();
                     }
-                    $entity = $this->query("SELECT {$entity}({$params})");
+                    $entity = $this->query("SELECT * FROM {$entity}({$params})");
                 } else {
-                    $entity = $this->query("SELECT {$entity}()");
+                    $entity = $this->query("SELECT * FROM {$entity}()");
                 }
                 $entity = $entity[0];
             }
@@ -197,9 +197,9 @@ class Action
                     } else {
                         $params = is_string($params) ? $this->params($params) : $this->params();
                     }
-                    $collection = $this->query("SELECT {$collection}({$params})");
+                    $collection = $this->query("SELECT * FROM {$collection}({$params})");
                 } else {
-                    $collection = $this->query("SELECT {$collection}()");
+                    $collection = $this->query("SELECT * FROM {$collection}()");
                 }
             }
             $this->action->setCollection($collection);
