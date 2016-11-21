@@ -167,7 +167,7 @@ class Action
             }
             $this->action->setEntity($entity);
         } catch(\Exception $e) {
-            $this->action->error($e->getMessage(), $e->getCode());
+            $this->error($e->getMessage(), $e->getCode());
         }
         return $this;
     }
@@ -204,7 +204,7 @@ class Action
             }
             $this->action->setCollection($collection);
         } catch(\Exception $e) {
-            $this->action->error($e->getMessage(), $e->getCode());
+            $this->error($e->getMessage(), $e->getCode());
         }
         return $this;
     }
@@ -226,7 +226,7 @@ class Action
                 $this->action->relateOne($pk, $type, $fk);
             }
         } catch(\Exception $e) {
-            $this->action->error($e->getMessage(), $e->getCode());
+            $this->error($e->getMessage(), $e->getCode());
         }
         return $this;
     }
@@ -243,7 +243,7 @@ class Action
         try {
             $this->action->link($link, $uri);
         } catch(\Exception $e) {
-            $this->action->error($e->getMessage(), $e->getCode());
+            $this->error($e->getMessage(), $e->getCode());
         }
         return $this;
     }
@@ -261,7 +261,7 @@ class Action
         try {
             $this->action->error($message, $code, $status);
         } catch(\Exception $e) {
-            $this->action->error($e->getMessage(), $e->getCode());
+            $this->action->error($e->getMessage(), $e->getCode(), '500 Internal Server Error');
         }
         return $this;
     }
