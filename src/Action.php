@@ -129,7 +129,8 @@ class Action
     {
         $params = [];
         foreach ($this->action->getParams($location) as $param) {
-            $params[] = "p_{$param->getName()} := {$param->getValue()}";
+            $value = $param->getType() === 'string' ? $this->database()->quote($param->getValue()) : $param->getValue();
+            $params[] = "p_{$param->getName()} := {$value}";
         }
         return implode(', ', $params);
     }
@@ -153,6 +154,7 @@ class Action
                     if (is_array($params)) {
                         $items = [];
                         foreach ($params as $param => $value) {
+                            $value = is_string($value) ? $this->database()->quote($value) : $value;
                             $items[] = "p_{$param} := {$value}";
                         }
                         $params = implode(', ', $items);
@@ -191,6 +193,7 @@ class Action
                     if (is_array($params)) {
                         $items = [];
                         foreach ($params as $param => $value) {
+                            $value = is_string($value) ? $this->database()->quote($value) : $value;
                             $items[] = "p_{$param} := {$value}";
                         }
                         $params = implode(', ', $items);
