@@ -129,7 +129,25 @@ class Action
     {
         $params = [];
         foreach ($this->action->getParams($location) as $param) {
-            $value = $param->getType() === 'string' ? $this->database()->quote($param->getValue()) : $param->getValue();
+            switch ($param->getType()) {
+                case 'null':
+                    $value = 'NULL';
+                    break;
+                case 'boolean':
+                    $value = !$param->getValue() ? 'FALSE' : 'TRUE';
+                    break;
+                case 'string':
+                    $value = $this->database()->quote($param->getValue());
+                    break;
+                case 'array':
+                    $value = $this->database()->quote($param->getValue());
+                    break;
+                case 'object':
+                    $value = $this->database()->quote($param->getValue());
+                    break;
+                default:
+                    $value = $param->getValue();
+            }
             $params[] = "p_{$param->getName()} := {$value}";
         }
         return implode(', ', $params);
