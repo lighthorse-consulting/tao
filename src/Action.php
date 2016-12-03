@@ -68,6 +68,23 @@ class Action
     }
 
     /**
+     * Loads a source file relatively from "actions/".
+     *
+     * @param string $filename The file to load, without the ".php" extension.
+     * @return Katana\Sdk\Action
+     */
+    public function load($filename)
+    {
+        $_file = dirname($_SERVER['SCRIPT_NAME']) . DIRECTORY_SEPARATOR
+                . 'actions' . DIRECTORY_SEPARATOR . $filename . '.php';
+        $callback = function ($action) use ($_file) {
+            include($_file);
+            return $action;
+        };
+        return $callback($this->action);
+    }
+
+    /**
      * Gets the action instance.
      *
      * @return Katana\Sdk\Action
@@ -92,7 +109,7 @@ class Action
      *
      * @return PDO
      */
-    protected function database()
+    public function database()
     {
         if (!$this->database) {
             $this->database = new \PDO(
@@ -114,7 +131,7 @@ class Action
      * @param string $sql The SQL query to execute.
      * @return array
      */
-    protected function query($sql)
+    public function query($sql)
     {
         return $this->database()->query($sql, \PDO::FETCH_ASSOC)->fetchAll();
     }
@@ -125,7 +142,7 @@ class Action
      * @param string $location The optional location of the parameters.
      * @return string
      */
-    protected function params($location = null)
+    public function params($location = null)
     {
         $params = [];
         foreach ($this->action->getParams($location) as $param) {
