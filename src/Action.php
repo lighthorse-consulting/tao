@@ -79,9 +79,9 @@ class Action
                 . 'actions' . DIRECTORY_SEPARATOR . $filename . '.php';
         $callback = function ($action) use ($_file) {
             include($_file);
-            return $action;
         };
-        return $callback($this->action);
+        $callback($this->action);
+        return $this;
     }
 
     /**
