@@ -117,7 +117,7 @@ class Action
                 $this->settings['database']['username'],
                 $this->settings['database']['password'],
                 [
-                    \PDO::ATTR_PERSISTENT => true,
+                    //\PDO::ATTR_PERSISTENT => true,
                     \PDO::ATTR_TIMEOUT => 10,
                     \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
                 ]
