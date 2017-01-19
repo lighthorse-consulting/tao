@@ -201,9 +201,9 @@ class Action
                 } else {
                     $entity = $this->query("SELECT * FROM {$entity}()");
                 }
-                $entity = $entity[0];
+                $entity = is_array($entity) && isset($entity[0]) ? $entity[0] : [];
             }
-            $this->action->setEntity($entity);
+            $this->action->setEntity((array)$entity);
         } catch(\Exception $e) {
             $this->error($e->getMessage(), $e->getCode());
         }
@@ -240,8 +240,9 @@ class Action
                 } else {
                     $collection = $this->query("SELECT * FROM {$collection}()");
                 }
+                $collection = is_array($collection) ? $collection : [];
             }
-            $this->action->setCollection($collection);
+            $this->action->setCollection((array)$collection);
         } catch(\Exception $e) {
             $this->error($e->getMessage(), $e->getCode());
         }
