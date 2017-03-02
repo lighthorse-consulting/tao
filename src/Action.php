@@ -133,6 +133,8 @@ class Action
     public function database()
     {
         if (!$this->database) {
+            $this->action->log('Connecting to database: ' . $this->settings['database']['dsn']);
+            $this->action->log('Accessing with user: ' . $this->settings['database']['username']);
             $this->database = new \PDO(
                 $this->settings['database']['dsn'],
                 $this->settings['database']['username'],
