@@ -85,6 +85,27 @@ class Action
     }
 
     /**
+     * Reads a settings section and optional property.
+     *
+     * @param string $section The section of the settings file.
+     * @param string $property The optional property name.
+     * @return string
+     */
+    public function setting($section, $property = null)
+    {
+        if (!isset($this->settings[$section])) {
+            return null;
+        }
+        if (isset($property)) {
+            if (!isset($this->settings[$section][$property])) {
+                return null;
+            }
+            return $this->settings[$section][$property];
+        }
+        return $this->settings[$section];
+    }
+
+    /**
      * Gets the action instance.
      *
      * @return Katana\Sdk\Action
