@@ -29,21 +29,21 @@ class Action
     /**
      * Action instance.
      *
-     * @var Katana\Sdk\Action
+     * @var \Katana\Sdk\Action
      */
     protected $action = null;
 
     /**
      * Database instance.
      *
-     * @var PDO
+     * @var \PDO
      */
     protected $database = null;
 
     /**
      * Constructor.
      *
-     * @param Katana\Sdk\Action $action The action instance.
+     * @param \Katana\Sdk\Action $action The action instance.
      */
     public function __construct(BaseAction $action)
     {
@@ -59,8 +59,8 @@ class Action
     /**
      * Initializes an instance.
      *
-     * @param Katana\Sdk\Action $action The action instance.
-     * @return Tao\Action
+     * @param \Katana\Sdk\Action $action The action instance.
+     * @return \Tao\Action
      */
     public static function init(BaseAction $action)
     {
@@ -68,19 +68,23 @@ class Action
     }
 
     /**
-     * Loads a source file relatively from "actions/".
+     * Loads a source file relatively from "actions/". If the filename is not 
+     * provided it assumes the action name.
      *
-     * @param string $filename The file to load, without the ".php" extension.
-     * @return Katana\Sdk\Action
+     * @param string $filename The file to load, without the ".php" extension. 
+     * @return \Katana\Sdk\Action
      */
-    public function load($filename)
+    public function load($filename = null)
     {
+        if (!$filename) {
+            $filename = $this->action->getName();
+        }
         $_file = dirname($_SERVER['SCRIPT_NAME']) . DIRECTORY_SEPARATOR
                 . 'actions' . DIRECTORY_SEPARATOR . $filename . '.php';
-        $callback = function ($action) use ($_file) {
+        $callback = function ($action, $settings, $database) use ($_file) {
             include($_file);
         };
-        $callback($this->action);
+        $callback($this->action, $this->settings, $this->database());
         return $this;
     }
 
@@ -108,7 +112,7 @@ class Action
     /**
      * Gets the action instance.
      *
-     * @return Katana\Sdk\Action
+     * @return \Katana\Sdk\Action
      */
     public function action()
     {
@@ -118,7 +122,7 @@ class Action
     /**
      * Run and return the action instance.
      *
-     * @return Katana\Sdk\Action
+     * @return \Katana\Sdk\Action
      */
     public function run()
     {
@@ -128,11 +132,11 @@ class Action
     /**
      * Initializes and gets the database.
      *
-     * @return PDO
+     * @return \PDO
      */
     public function database()
     {
-        if (!$this->database) {
+        if (!$this->database && isset($this->settings['database'])) {
             $this->action->log('Connecting to database: ' . $this->settings['database']['dsn']);
             $this->action->log('Accessing with user: ' . $this->settings['database']['username']);
             $this->database = new \PDO(
@@ -203,7 +207,7 @@ class Action
      * the SQL function as parameters, if false no parameters will be passed, 
      * if a string then the parameters from that location will be passed, and 
      * if an array the items will be assumed as key => value.
-     * @return Tao\Action
+     * @return \Tao\Action
      */
     public function entity($entity, $params = true)
     {
@@ -242,7 +246,7 @@ class Action
      * the SQL function as parameters, if false no parameters will be passed, 
      * if a string then the parameters from that location will be passed, and 
      * if an array the items will be assumed as key => value.
-     * @return Tao\Action
+     * @return \Tao\Action
      */
     public function collection($collection, $params = true)
     {
@@ -278,7 +282,7 @@ class Action
      * @param string $pk The primary key.
      * @param string $type The related type.
      * @param string|array $fk The foreign key(s) to relate.
-     * @return Tao\Action
+     * @return \Tao\Action
      */
     public function relation($pk, $type, $fk)
     {
@@ -299,7 +303,7 @@ class Action
      *
      * @param string $link The link reference.
      * @param string $uri The link URI.
-     * @return Tao\Action
+     * @return \Tao\Action
      */
     public function link($link, $uri)
     {
@@ -317,7 +321,7 @@ class Action
      * @param string $message The error message.
      * @param integer $code The error code, defaults to 0.
      * @param string $status The HTTP status code, default to ERROR_STATUS.
-     * @return Tao\Action
+     * @return \Tao\Action
      */
     public function error($message, $code = 0, $status = self::ERROR_STATUS)
     {

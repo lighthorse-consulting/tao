@@ -5,18 +5,11 @@
     "keywords": ["tao", "lighthorse"],
     "homepage": "https://github.com/lighthorse-consulting/tao",
     "license": "MIT",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@github.com:kusanagi/katana-sdk-php5.git",
-            "no-api": true
-        }
-    ],
     "autoload": {
         "psr-4": {"Tao\\": "src"}
     },
     "require": {
-        "php": "^5.6",
-        "kusanagi/katana-sdk-php5": "*@dev"
+        "php": "^7.0",
+        "kusanagi/katana-sdk-php7": "^1.0"
     }
 }

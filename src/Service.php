@@ -17,7 +17,7 @@ class Service
     /**
      * Service instance.
      *
-     * @var Katana\Sdk\Service
+     * @var \Katana\Sdk\Service
      */
     protected $service = null;
 
@@ -32,7 +32,7 @@ class Service
     /**
      * Gets the service instance.
      *
-     * @return Katana\Sdk\Service
+     * @return \Katana\Sdk\Service
      */
     public function service()
     {
@@ -45,7 +45,7 @@ class Service
      * @static
      * @param array $actions The key => value array of actions to register, 
      * where the key is the action name and the value a callback.
-     * @return Tao\Service
+     * @return \Tao\Service
      */
     public static function init($actions)
     {
@@ -69,7 +69,7 @@ class Service
      * Registers a startup event.
      *
      * @param callable $callback The function to execute.
-     * @return Tao\Service
+     * @return \Tao\Service
      */
     public function startup(callable $callback)
     {
@@ -81,7 +81,7 @@ class Service
      * Registers a shutdown event.
      *
      * @param callable $callback The function to execute.
-     * @return Tao\Service
+     * @return \Tao\Service
      */
     public function shutdown(callable $callback)
     {
