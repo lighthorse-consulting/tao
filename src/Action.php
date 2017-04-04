@@ -50,10 +50,10 @@ class Action
         $this->action = $action;
         $this->action->log('[TAO] Service path: ' . dirname($_SERVER['SCRIPT_NAME']));
         $path = dirname($_SERVER['SCRIPT_NAME']) . DIRECTORY_SEPARATOR;
-        $this->action->log('[TAO] Parsing settings.ini file');
+        $this->action->log('[TAO] Parsing settings.ini file...');
         $this->settings = parse_ini_file($path . 'settings.ini', true);
         if (is_readable($path . 'settings.local.ini')) {
-            $this->action->log('[TAO] Parsing settings.local.ini file');
+            $this->action->log('[TAO] Parsing settings.local.ini file...');
             $settings = parse_ini_file($path . 'settings.local.ini', true);
             $this->settings = array_merge($this->settings, $settings);
         }
@@ -67,6 +67,7 @@ class Action
      */
     public static function init(BaseAction &$action)
     {
+        $action->log('[TAO] Initializing...');
         return new static($action);
     }
 
@@ -85,8 +86,9 @@ class Action
         $_file = dirname($_SERVER['SCRIPT_NAME']) . DIRECTORY_SEPARATOR
                 . 'actions' . DIRECTORY_SEPARATOR . $filename . '.php';
         $_this = $this;
-        $this->action->log('[TAO] Loading action: ' . $_file);
+        $this->action->log('[TAO] Action file: ' . $_file);
         $callback = function (&$action, $settings, $database) use ($_file, $_this) {
+            $action->log('[TAO] Loading action file...');
             include($_file);
             $_this->action($action);
         };
@@ -222,6 +224,7 @@ class Action
      */
     public function entity($entity, $params = true)
     {
+        $this->action->log('[TAO] Adding entity...');
         try {
             if (is_string($entity)) {
                 if ($params) {
@@ -261,6 +264,7 @@ class Action
      */
     public function collection($collection, $params = true)
     {
+        $this->action->log('[TAO] Adding collection...');
         try {
             if (is_string($collection)) {
                 if ($params) {
@@ -297,6 +301,7 @@ class Action
      */
     public function relation($pk, $type, $fk)
     {
+        $this->action->log('[TAO] Adding relation: ' . $type . ' (' . $pk . ')');
         try {
             if (is_array($fk)) {
                 $this->action->relateMany($pk, $type, $fk);
@@ -318,6 +323,7 @@ class Action
      */
     public function link($link, $uri)
     {
+        $this->action->log('[TAO] Adding link: ' . $link . ' (' . $uri . ')');
         try {
             $this->action->link($link, $uri);
         } catch(\Exception $e) {
