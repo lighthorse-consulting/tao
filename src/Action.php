@@ -45,15 +45,18 @@ class Action
      *
      * @param \Katana\Sdk\Action $action The action instance.
      */
-    public function __construct(BaseAction $action)
+    public function __construct(BaseAction &$action)
     {
+        $this->action = $action;
+        $this->action->log('[TAO] Service path: ' . dirname($_SERVER['SCRIPT_NAME']));
         $path = dirname($_SERVER['SCRIPT_NAME']) . DIRECTORY_SEPARATOR;
+        $this->action->log('[TAO] Parsing settings.ini file');
         $this->settings = parse_ini_file($path . 'settings.ini', true);
         if (is_readable($path . 'settings.local.ini')) {
+            $this->action->log('[TAO] Parsing settings.local.ini file');
             $settings = parse_ini_file($path . 'settings.local.ini', true);
             $this->settings = array_merge($this->settings, $settings);
         }
-        $this->action = $action;
     }
 
     /**
@@ -62,7 +65,7 @@ class Action
      * @param \Katana\Sdk\Action $action The action instance.
      * @return \Tao\Action
      */
-    public static function init(BaseAction $action)
+    public static function init(BaseAction &$action)
     {
         return new static($action);
     }
@@ -77,12 +80,15 @@ class Action
     public function load($filename = null)
     {
         if (!$filename) {
-            $filename = $this->action->getName();
+            $filename = $this->action->getActionName();
         }
         $_file = dirname($_SERVER['SCRIPT_NAME']) . DIRECTORY_SEPARATOR
                 . 'actions' . DIRECTORY_SEPARATOR . $filename . '.php';
-        $callback = function ($action, $settings, $database) use ($_file) {
+        $_this = $this;
+        $this->action->log('[TAO] Loading action: ' . $_file);
+        $callback = function (&$action, $settings, $database) use ($_file, $_this) {
             include($_file);
+            $_this->action($action);
         };
         $callback($this->action, $this->settings, $this->database());
         return $this;
@@ -112,10 +118,14 @@ class Action
     /**
      * Gets the action instance.
      *
+     * @param \Katana\Sdk\Action $action An action instance to update the value.
      * @return \Katana\Sdk\Action
      */
-    public function action()
+    public function action(BaseAction &$action = null)
     {
+        if (isset($action)) {
+            $this->action = $action;
+        }
         return $this->action;
     }
 
@@ -137,8 +147,8 @@ class Action
     public function database()
     {
         if (!$this->database && isset($this->settings['database'])) {
-            $this->action->log('Connecting to database: ' . $this->settings['database']['dsn']);
-            $this->action->log('Accessing with user: ' . $this->settings['database']['username']);
+            $this->action->log('[TAO] Connecting to database: ' . $this->settings['database']['dsn']);
+            $this->action->log('[TAO] Accessing with user: ' . $this->settings['database']['username']);
             $this->database = new \PDO(
                 $this->settings['database']['dsn'],
                 $this->settings['database']['username'],
@@ -161,6 +171,7 @@ class Action
      */
     public function query($sql)
     {
+        $this->action->log('[TAO] Running query: ' . $sql);
         return $this->database()->query($sql, \PDO::FETCH_ASSOC)->fetchAll();
     }
 
@@ -325,6 +336,7 @@ class Action
      */
     public function error($message, $code = 0, $status = self::ERROR_STATUS)
     {
+        $this->action->log('[TAO] Error: ' . $message);
         try {
             $this->action->error($message, $code, $status);
         } catch(\Exception $e) {
