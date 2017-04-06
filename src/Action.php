@@ -60,6 +60,36 @@ class Action
     }
 
     /**
+     * Returns the path for an action source file.
+     *
+     * @param string $filename
+     * @return string
+     * @throws \Exception
+     */
+    private function getSourcePath(string $filename): string
+    {
+        $path = implode(DIRECTORY_SEPARATOR, [
+            dirname($_SERVER['SCRIPT_NAME']),
+            'actions',
+            "$filename.php"
+        ]);
+
+        $this->action->log("[TAO] Source file path resolved: $path");
+
+        if (!is_readable($path)) {
+            $this->action->error(
+                'Source file not readable',
+                1,
+                '500 Internal Server Error'
+            );
+
+            return '';
+        }
+
+        return $path;
+    }
+
+    /**
      * Initializes an instance.
      *
      * @param \Katana\Sdk\Action $action The action instance.
@@ -93,6 +123,33 @@ class Action
             $_this->action($action);
         };
         $callback($this->action, $this->settings, $this->database());
+        return $this;
+    }
+
+    /**
+     * Loads a source file relatively from "actions/". If the filename is not
+     * provided it assumes the action name.
+     *
+     * @param callable $callback The callable to call.
+     * @return \Tao\Action
+     */
+    public function call(callable $callback = null)
+    {
+        $this->action->log(
+            "[TAO] Call requested from action: {$this->action->getActionName()}"
+        );
+        if (!$callback) {
+            $path = $this->getSourcePath($this->action->getActionName());
+            if ($path) {
+                $callback = require $path;
+            } else {
+                return $this;
+            }
+        }
+
+        $this->action->log("[TAO] Called action: {$this->action->getActionName()}");
+        $callback($this);
+
         return $this;
     }
 
