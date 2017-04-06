@@ -74,8 +74,16 @@ class Action
             "$filename.php"
         ]);
 
+        $this->action->log("[TAO] Source file path resolved: $path");
+
         if (!is_readable($path)) {
-            throw new \Exception('Source file not readable');
+            $this->action->error(
+                'Source file not readable',
+                1,
+                '500 Internal Server Error'
+            );
+
+            return '';
         }
 
         return $path;
@@ -127,21 +135,19 @@ class Action
      */
     public function call(callable $callback = null)
     {
+        $this->action->log(
+            "[TAO] Call requested from action: {$this->action->getActionName()}"
+        );
         if (!$callback) {
-            try {
-                $callback = require $this->getSourcePath(
-                    $this->action->getActionName()
-                );
-            } catch (\Throwable $e) {
-                $this->action->error(
-                    "[TAO] Error reading source file for {$this->action->getActionName()}"
-                );
-
+            $path = $this->getSourcePath($this->action->getActionName());
+            if ($path) {
+                $callback = require $path;
+            } else {
                 return $this;
             }
         }
 
-        $this->action->log("[TAO] Call action: {$this->action->getActionName()}");
+        $this->action->log("[TAO] Called action: {$this->action->getActionName()}");
         $callback($this);
 
         return $this;
