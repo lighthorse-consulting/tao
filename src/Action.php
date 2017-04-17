@@ -62,30 +62,21 @@ class Action
     /**
      * Returns the path for an action source file.
      *
-     * @param string $filename
+     * @param string $filename The filename to lookup.
      * @return string
-     * @throws \Exception
      */
-    private function getSourcePath(string $filename): string
+    public function getSourcePath($filename)
     {
         $path = implode(DIRECTORY_SEPARATOR, [
             dirname($_SERVER['SCRIPT_NAME']),
             'actions',
-            "$filename.php"
+            "{$filename}.php"
         ]);
-
-        $this->action->log("[TAO] Source file path resolved: $path");
-
+        $this->action->log("[TAO] Source file path resolved: {$path}");
         if (!is_readable($path)) {
-            $this->action->error(
-                'Source file not readable',
-                1,
-                '500 Internal Server Error'
-            );
-
+            $this->error('Source file not readable', 1);
             return '';
         }
-
         return $path;
     }
 
@@ -106,20 +97,23 @@ class Action
      * provided it assumes the action name.
      *
      * @param string $filename The file to load, without the ".php" extension. 
-     * @return \Katana\Sdk\Action
+     * @return \Tao\Action
      */
     public function load($filename = null)
     {
         if (!$filename) {
             $filename = $this->action->getActionName();
         }
-        $_file = dirname($_SERVER['SCRIPT_NAME']) . DIRECTORY_SEPARATOR
-                . 'actions' . DIRECTORY_SEPARATOR . $filename . '.php';
+        $_file = $this->getSourcePath($filename);
         $_this = $this;
-        $this->action->log('[TAO] Action file: ' . $_file);
+        $this->action->log("[TAO] Action file: {$_file}");
         $callback = function (&$action, $settings, $database) use ($_file, $_this) {
-            $action->log('[TAO] Loading action file...');
-            include($_file);
+            try {
+                $action->log('[TAO] Loading action file...');
+                include $_file;
+            } catch(\Exception $e) {
+                $_this->error($e->getMessage(), $e->getCode());
+            }
             $_this->action($action);
         };
         $callback($this->action, $this->settings, $this->database());
@@ -135,21 +129,22 @@ class Action
      */
     public function call(callable $callback = null)
     {
-        $this->action->log(
-            "[TAO] Call requested from action: {$this->action->getActionName()}"
-        );
-        if (!$callback) {
-            $path = $this->getSourcePath($this->action->getActionName());
-            if ($path) {
-                $callback = require $path;
-            } else {
-                return $this;
+        $this->action->log("[TAO] Action callback: {$this->action->getActionName()}");
+        try {
+            if (!$callback) {
+                $path = $this->getSourcePath($this->action->getActionName());
+                if ($path) {
+                    $action->log('[TAO] Loading action callback...');
+                    $callback = require $path;
+                } else {
+                    return $this;
+                }
             }
+            $this->action->log("[TAO] Executing callback...");
+            $callback($this);
+        } catch(\Exception $e) {
+            $this->error($e->getMessage(), $e->getCode());
         }
-
-        $this->action->log("[TAO] Called action: {$this->action->getActionName()}");
-        $callback($this);
-
         return $this;
     }
 
@@ -230,7 +225,7 @@ class Action
      */
     public function query($sql)
     {
-        $this->action->log('[TAO] Running query: ' . $sql);
+        $this->action->log("[TAO] Running query: {$sql}");
         return $this->database()->query($sql, \PDO::FETCH_ASSOC)->fetchAll();
     }
 
@@ -358,7 +353,7 @@ class Action
      */
     public function relation($pk, $type, $fk)
     {
-        $this->action->log('[TAO] Adding relation: ' . $type . ' (' . $pk . ')');
+        $this->action->log("[TAO] Adding relation: {$type} ({$pk})");
         try {
             if (is_array($fk)) {
                 $this->action->relateMany($pk, $type, $fk);
@@ -380,7 +375,7 @@ class Action
      */
     public function link($link, $uri)
     {
-        $this->action->log('[TAO] Adding link: ' . $link . ' (' . $uri . ')');
+        $this->action->log("[TAO] Adding link: {$link} ({$uri})");
         try {
             $this->action->link($link, $uri);
         } catch(\Exception $e) {
@@ -399,7 +394,7 @@ class Action
      */
     public function error($message, $code = 0, $status = self::ERROR_STATUS)
     {
-        $this->action->log('[TAO] Error: ' . $message);
+        $this->action->log("[TAO] Error: {$message}");
         try {
             $this->action->error($message, $code, $status);
         } catch(\Exception $e) {
