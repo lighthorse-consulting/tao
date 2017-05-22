@@ -134,7 +134,7 @@ class Action
             if (!$callback) {
                 $path = $this->getSourcePath($this->action->getActionName());
                 if ($path) {
-                    $this->action->log('[TAO] Loading action callback...');
+                    $action->log('[TAO] Loading action callback...');
                     $callback = require $path;
                 } else {
                     return $this;
@@ -396,9 +396,9 @@ class Action
     {
         $this->action->log("[TAO] Error: {$message}");
         try {
-            $this->action->error($message, $code, $status);
+            $this->action->error($message, (int) $code, $status);
         } catch(\Exception $e) {
-            $this->action->error($e->getMessage(), $e->getCode(), '500 Internal Server Error');
+            $this->action->error($e->getMessage(), (int) $e->getCode(), '500 Internal Server Error');
         }
         return $this;
     }
