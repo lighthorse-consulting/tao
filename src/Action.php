@@ -134,7 +134,7 @@ class Action
             if (!$callback) {
                 $path = $this->getSourcePath($this->action->getActionName());
                 if ($path) {
-                    $action->log('[TAO] Loading action callback...');
+                    $this->action->log('[TAO] Loading action callback...');
                     $callback = require $path;
                 } else {
                     return $this;
