@@ -10,6 +10,6 @@
     },
     "require": {
         "php": "^7.0",
-        "kusanagi/katana-sdk-php7": "^1.0"
+        "kusanagi/katana-sdk-php7": "^1.1"
     }
 }
