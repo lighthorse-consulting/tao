@@ -8,6 +8,7 @@
 namespace Tao;
 
 use Katana\Sdk\Action as BaseAction;
+use Tao\Plugin\ActionPlugin;
 
 /**
  * Action class.
@@ -18,6 +19,12 @@ class Action
      * Default error status.
      */
     const ERROR_STATUS = '500 Internal Server Error';
+
+    /**
+     * @var ActionPlugin[]
+     */
+    private $plugins = [];
+
 
     /**
      * INI settings.
@@ -400,6 +407,37 @@ class Action
         } catch(\Exception $e) {
             $this->action->error($e->getMessage(), (int) $e->getCode(), '500 Internal Server Error');
         }
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @param array ...$args
+     * @return $this
+     * @throws \Exception
+     */
+    public function plugin(string $name, ...$args)
+    {
+        if (!isset($this->plugins[$name])) {
+            $pluginName = ucfirst($name);
+            $pluginClass = "Tao\\Plugin\\$pluginName";
+            if (!class_exists($pluginClass)) {
+                throw new \Exception("Plugin $pluginName not found");
+            }
+
+            $plugin = new $pluginClass($this);
+            if (!$plugin instanceof ActionPlugin) {
+                throw new \Exception("Invalid plugin. Must implement Tao\Plugin\ActionPlugin");
+            }
+
+            $this->plugins[$name] = $plugin;
+
+        } else {
+            $plugin = $this->plugins[$name];
+        }
+
+        $plugin->run(...$args);
+
         return $this;
     }
 }

@@ -8,12 +8,18 @@
 namespace Tao;
 
 use Katana\Sdk\Service as BaseService;
+use Tao\Plugin\ServicePlugin;
 
 /**
  * Service class.
  */
 class Service
 {
+    /**
+     * @var ServicePlugin[]
+     */
+    private $plugins = [];
+
     /**
      * Service instance.
      *
@@ -47,7 +53,7 @@ class Service
      * where the key is the action name and the value a callback.
      * @return \Tao\Service
      */
-    public static function init($actions)
+    public static function init(array $actions = [])
     {
         $instance = new static;
         $service = $instance->service();
@@ -97,5 +103,36 @@ class Service
     public function run()
     {
         return $this->service->run();
+    }
+
+    /**
+     * @param string $name
+     * @param array ...$args
+     * @return $this
+     * @throws \Exception
+     */
+    public function plugin(string $name, ...$args)
+    {
+        if (!isset($this->plugins[$name])) {
+            $pluginName = ucfirst($name);
+            $pluginClass = "Tao\\Plugin\\$pluginName";
+            if (!class_exists($pluginClass)) {
+                throw new \Exception("Plugin $pluginName not found");
+            }
+
+            $plugin = new $pluginClass($this);
+            if (!$plugin instanceof ServicePlugin) {
+                throw new \Exception("Invalid plugin. Must implement Tao\Plugin\ServicePlugin");
+            }
+
+            $this->plugins[$name] = $plugin;
+
+        } else {
+            $plugin = $this->plugins[$name];
+        }
+
+        $plugin->run(...$args);
+
+        return $this;
     }
 }
