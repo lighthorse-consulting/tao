@@ -4,7 +4,7 @@ namespace Tao\Plugin;
 
 use Tao\Action;
 
-abstract class ActionPlugin
+abstract class ActionPlugin implements PluginInterface
 {
     /**
      * @var Action

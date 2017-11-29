@@ -4,7 +4,7 @@ namespace Tao\Plugin;
 
 use Tao\Service;
 
-abstract class ServicePlugin
+abstract class ServicePlugin implements PluginInterface
 {
     /**
      * @var Service
